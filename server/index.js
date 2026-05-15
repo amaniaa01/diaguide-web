@@ -11,7 +11,7 @@ app.use(express.json());
 
 // Routes
 app.use('/api/auth', require('./routes/auth'));
-
+app.use('/api/glucose', require('./routes/glucose'));
 // Test route
 app.get('/', (req, res) => {
   res.json({ message: 'DiaGuide API is running ✅' });
