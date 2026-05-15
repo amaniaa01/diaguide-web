@@ -12,17 +12,46 @@ exports.calculateDose = async (req, res) => {
     const { insulinToCarbRatio, correctionFactor, targetGlucoseMin, targetGlucoseMax } = user;
 
     // Fetch nutrition data from Open Food Facts API
-    let carbsPer100g = 0;
-    try {
-      const response = await axios.get(
-        `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(foodName)}&search_simple=1&action=process&json=1&page_size=1`
-      );
-      const product = response.data.products[0];
-      carbsPer100g = product?.nutriments?.carbohydrates_100g || 0;
-    } catch (err) {
-      carbsPer100g = 0;
+   // Fetch nutrition data from Open Food Facts API
+let carbsPer100g = 0;
+try {
+  const response = await axios.get(
+    `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(foodName)}&search_simple=1&action=process&json=1&page_size=5`,
+    { timeout: 8000 }
+  );
+  const products = response.data.products;
+  // Find first product with valid carb data
+  for (const product of products) {
+    const carbs = product?.nutriments?.carbohydrates_100g ||
+                  product?.nutriments?.carbohydrates ||
+                  product?.nutriments?.['carbohydrates_value'];
+    if (carbs && carbs > 0) {
+      carbsPer100g = carbs;
+      break;
     }
+  }
 
+  // Fallback common foods if API returns 0
+  if (carbsPer100g === 0) {
+    const commonFoods = {
+      'rice': 80, 'white rice': 80, 'brown rice': 76,
+      'bread': 49, 'white bread': 49,
+      'apple': 14, 'banana': 23, 'orange': 12,
+      'potato': 17, 'pasta': 75, 'oats': 66,
+      'milk': 5, 'yogurt': 10, 'cheese': 1,
+      'chicken': 0, 'beef': 0, 'fish': 0,
+      'egg': 1, 'sugar': 100, 'chocolate': 60
+    };
+    carbsPer100g = commonFoods[foodName.toLowerCase()] || 20;
+  }
+} catch (err) {
+  // Fallback if API fails completely
+  const commonFoods = {
+    'rice': 80, 'bread': 49, 'apple': 14,
+    'banana': 23, 'potato': 17, 'pasta': 75
+  };
+  carbsPer100g = commonFoods[foodName.toLowerCase()] || 20;
+}
     // Step 1: Calculate total carbs
     const totalCarbs = (carbsPer100g * quantity) / 100;
 
