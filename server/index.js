@@ -6,13 +6,18 @@ require('dotenv').config();
 const app = express();
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: '*',
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 app.use(express.json());
 
 // Routes
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/glucose', require('./routes/glucose'));
 app.use('/api/dose', require('./routes/dose'));
+app.use('/api/ai', require('./routes/ai'));
 // Test route
 app.get('/', (req, res) => {
   res.json({ message: 'DiaGuide API is running ✅' });
