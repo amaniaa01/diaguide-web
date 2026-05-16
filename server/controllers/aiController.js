@@ -16,12 +16,12 @@ exports.getWeeklyReport = async (req, res) => {
 
     res.json({ report: text });
 
-  } catch (err) {
+} catch (err) {
     console.error('Gemini error:', err.message);
     res.status(500).json({ 
       message: 'AI service error', 
       error: err.message,
-      report: 'Educational content temporarily unavailable. Please try again later.' 
+      report: null 
     });
   }
 };
