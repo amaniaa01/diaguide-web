@@ -33,6 +33,6 @@ mongoose.connect(process.env.MONGO_URI)
     });
     // Send notifications every 8 hours
     const { sendToAllUsers } = require('./notifications');
-    setInterval(sendToAllUsers, 8 * 60 * 60 * 1000);
+    setInterval(sendToAllUsers, 60 * 60 * 1000);
   })
   .catch((err) => console.log('MongoDB connection error:', err));
