@@ -18,6 +18,7 @@ app.use('/api/auth', require('./routes/auth'));
 app.use('/api/glucose', require('./routes/glucose'));
 app.use('/api/dose', require('./routes/dose'));
 app.use('/api/ai', require('./routes/ai'));
+
 // Test route
 app.get('/', (req, res) => {
   res.json({ message: 'DiaGuide API is running ✅' });
@@ -30,5 +31,8 @@ mongoose.connect(process.env.MONGO_URI)
     app.listen(process.env.PORT || 5000, () => {
       console.log(`Server running on port ${process.env.PORT || 5000} ✅`);
     });
+    // Send notifications every 8 hours
+    const { sendToAllUsers } = require('./notifications');
+    setInterval(sendToAllUsers, 8 * 60 * 60 * 1000);
   })
   .catch((err) => console.log('MongoDB connection error:', err));
